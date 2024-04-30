@@ -351,7 +351,7 @@ async def process_file(file: UploadFile = File(...),
     except OSError as e:
         logger.error(f"Error removing the file {e}")
 
-    return {'index': ids,"filename":filename, "status":status, 'length': len(ids)}
+    return {"filename":filename, "status":status, 'length': len(ids)}
 
 @app.post("/keyfacts_agent")
 async def yanolakey_facts(query: str = Form(...),
