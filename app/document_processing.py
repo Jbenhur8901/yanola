@@ -1,7 +1,5 @@
 import logging
-from PyPDF2 import PdfReader
 from langchain_community.document_loaders import DirectoryLoader, SeleniumURLLoader
-from langchain_community.document_loaders import UnstructuredFileLoader
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
@@ -72,3 +70,4 @@ def delete(ids,index):
                                    embedding=embedding)
     vectordb.delete(ids=ids,delete_all=True)
     return "Success"
+

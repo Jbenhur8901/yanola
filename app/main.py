@@ -324,7 +324,7 @@ async def process_file(file: UploadFile = File(...),
     import os
 
     filename = file.filename
-    path = "tempfiles/{filename}"
+    path = "{filename}"
     with open(path, "wb") as f:
         f.write(await file.read())
 
@@ -405,5 +405,3 @@ async def delete(index_ids: list = Form(...),
 
     return {"response":status}
 
-if __name__ == "__main__":
-   uvicorn.run(app)
