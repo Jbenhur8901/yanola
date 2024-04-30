@@ -65,25 +65,6 @@ def url_loaders(urls, index):
         logger.error(f"Error loading documents from URLs: {e}")
         return f"Error loading documents from URLs: {e}"
 
-
-def process_file(file,index):
-
-    try:
-        loader = PyPDFLoader(file)
-        docs = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=300, separators="\n\n")
-        chunks = text_splitter.split_documents(docs)
-    except Exception as e:
-        logger.error(f"Error when processing documents: {e}")
-
-    try:
-        vector = PineconeVectorStore(index_name=index, embedding=embedding)
-        ids = vector.add_documents(chunks)
-        return ids
-    except Exception as e:
-        logger.error(f"Error adding documents to index: {e}")
-        return []
-    
 def delete(ids,index):
     vectordb = PineconeVectorStore(index_name=index,
                                    embedding=embedding)
