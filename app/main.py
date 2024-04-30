@@ -1,8 +1,8 @@
 import logging
 from fastapi import FastAPI, Form, UploadFile, File, Depends, HTTPException, status
-from agent import RetrievalAgent
-from basicLLM import YanolaBasic, YanolaKeyFacts
-from document_processing import url_loaders, delete
+from app.agent import RetrievalAgent
+from app.basicLLM import YanolaBasic, YanolaKeyFacts
+from app.document_processing import url_loaders, delete
 import uvicorn
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -12,8 +12,6 @@ from passlib.context import CryptContext
 import requests
 import os
 from dotenv import load_dotenv
-
-
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,18 +29,42 @@ auth_token = f"{os.environ['AIRTABLE_API_KEY']}"
 headers = {"Authorization": f"Bearer {auth_token}"}
 
 def airtable_get_data():
-    
+    """
+    Fetches data from Airtable using the Airtable API.
+
+    This function sends a GET request to the specified Airtable API URL with the provided headers,
+    retrieves the response data, and returns it as a JSON object.
+
+    Returns:
+        dict: A dictionary containing the response data from Airtable, parsed as JSON.
+    """
     try:
         response = requests.get(url, headers=headers)
-        response.raise_for_status()  # Raise an exception if the response status code is not successful
+        response.raise_for_status()  
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
         logger.error(f"Error occurred while fetching data from Airtable: {e}")
-        return []  # Return an empty list in case of an error
+        return []  
 
 def json_db():
-    data = airtable_get_data()
+    """
+    Constructs a JSON-like database from data retrieved from Airtable.
+
+    Retrieves data from Airtable using the `airtable_get_data()` function,
+    then constructs a dictionary-like database where each record's username
+    serves as the key, and the record's fields, including an added 'id' field
+    with the record's ID, serve as the corresponding values.
+
+    Returns:
+        dict: A dictionary representing the constructed database, with usernames
+              as keys and corresponding record fields as values, including the record ID.
+    """
+    try:
+        data = airtable_get_data()
+    except Exception as e:
+        logger.error(f"Error fetching data from Airtable: {e}")
+
     db = {}
     for record in data["records"]:
         record_username = record["fields"]["username"]
@@ -194,7 +216,7 @@ async def yanola_basic(query: str = Form(...),
         db[current_user.username]["limit"]-=1
         agent = YanolaBasic(user_input=query,session_id=session_id)
         response = agent.run()
-        return {"response": response}
+        return {"response": response,"limit":db[current_user.username]["limit"]}
     else:
         return {"response": "Vous avez atteint votre limite mensuelle"}
 
